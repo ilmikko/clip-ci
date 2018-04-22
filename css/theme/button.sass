@@ -1,0 +1,38 @@
+$background-color:	#3e7384
+$padding:		8px
+$height:		50px
+$border-radius:		3px
+$border-color:		black
+$shadow-color:		transparentize($background-color, .5)
+
+//Buttons
+@mixin pressable()
+	cursor: pointer
+	text-shadow: 3px 3px 5px black
+	transform: scale(1,1)
+	background: transparent
+
+	&:hover
+		transform: scale(1.2,1.2)
+		background-color: lighten(transparentize($background-color, 0.7), 10%)
+	&:active
+		text-shadow: 1px 1px 8px black
+		transform: scale(0.98,0.98)
+	transition: background-color 200ms, text-shadow 200ms, transform 200ms, opacity 300ms
+
+button.icon
+	width: $height
+	height: $height
+	padding: 0
+	line-height: 0
+
+button
+	@include pressable
+	padding: 12px
+	margin: 10px
+	border: 0
+	font-size: 32px
+	border-radius: 4px
+
+	&:not(.icon)
+		font-weight: bold

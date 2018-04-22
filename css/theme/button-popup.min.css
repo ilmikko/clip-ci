@@ -1,0 +1,1 @@
+.button-popup{position:relative;display:flex;flex-direction:column;max-height:100vh}.button-popup .popup{background-color:rgba(78,145,167,0.3);border-radius:7px;padding:25px;display:flex;flex:1 1 200px;justify-content:center;z-index:100}.button-popup button{flex:0 0 auto}

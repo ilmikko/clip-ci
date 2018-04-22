@@ -1,0 +1,15 @@
+// Prevent the controls for the video showing even when we don't have JavaScript
+video::-webkit-media-controls
+	display:none !important
+
+// Fix webkit fullscreen behavior
+*:-webkit-full-screen
+  width: 100%
+  height: 100%
+
+// Remove focus outlines
+*:focus
+	outline: none
+*::-moz-focus-inner
+	border: 0
+	outline: none

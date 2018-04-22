@@ -1,0 +1,100 @@
+.controls
+  flex-direction: column
+  align-items: normal
+  justify-content: normal
+
+  display: flex
+
+  pointer-events: none
+
+  button
+    pointer-events: all
+
+  .col
+    flex: 1 1 auto
+    display: flex
+    flex-direction: column
+
+    &.mid
+      flex: 10 1 auto
+
+  .row
+    flex: 1 1 auto
+    display: flex
+    flex-direction: row
+
+    &.mid
+      flex: 10 1 auto
+
+    &:last-child
+      // Bottom row
+      flex: 1 1 20px
+
+  &.fade
+    transition: opacity 500ms, transform 500ms
+
+  &.hidden
+    opacity: 0
+    // Scale away ever so slightly
+    transform: scale(1.02)
+
+    &:hover
+      // Hidden hover shows controls
+      opacity: 0.25
+      transform: scale(1.01)
+
+.controls
+  // TODO: Clean this up
+  padding: 30px
+
+  .row:first-child
+    align-items: flex-start
+
+  .row:last-child
+    // Bottom bar, captures all pointer events
+    align-items: flex-end
+
+    pointer-events: all
+
+    .col
+      max-height: 75px
+
+  .controls-c
+    align-items: center
+
+  .controls-e
+    align-items: flex-end
+
+  .controls-nw, .controls-ne
+    flex-direction: row
+    align-items: flex-start
+
+  .controls-w, .controls-c, .controls-e
+    flex-direction: column
+    justify-content: center
+
+  .controls-sw, .controls-s, .controls-se
+    align-items: flex-end
+    flex-direction: row
+
+  .controls-nw, .controls-sw
+    justify-content: flex-start
+
+  .controls-n, .controls-c, .controls-s
+    justify-content: center
+
+  .controls-ne, .controls-se
+    justify-content: flex-end
+
+// In lack of space, pop the middle element on top of the rest.
+@media screen and (max-width: 720px)
+  .controls
+    .row
+      flex-wrap: wrap
+
+      &:last-child
+        flex: 1 1 auto
+
+    .col.mid
+        order: -1
+        flex-basis: 100%
