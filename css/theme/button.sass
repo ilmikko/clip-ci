@@ -1,6 +1,5 @@
 $background-color:	#3e7384
 $padding:		8px
-$height:		50px
 $border-radius:		3px
 $border-color:		black
 $shadow-color:		transparentize($background-color, .5)
@@ -20,19 +19,13 @@ $shadow-color:		transparentize($background-color, .5)
 		transform: scale(0.98,0.98)
 	transition: background-color 200ms, text-shadow 200ms, transform 200ms, opacity 300ms
 
-button.icon
-	width: $height
-	height: $height
-	padding: 0
-	line-height: 0
-
 button
 	@include pressable
 	padding: 12px
 	margin: 10px
+
 	border: 0
 	font-size: 32px
 	border-radius: 4px
 
-	&:not(.icon)
-		font-weight: bold
+	background-color: rgba(0,0,0,0.22)
