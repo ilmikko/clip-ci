@@ -25,12 +25,27 @@
 
   &:before
     font-family: "icon"
-    font-weight: normal
     font-size: 132px
 
 // Icon codes
-.icon-text[name=load]:before
-		content: '\e134'
+@mixin icon($name, $content)
+	$attr-list: null
 
-.icon-text[name=replay]:before
-		content: '\e030'
+	.icon[name=#{$name}]:before,
+	.icon-text[name=#{$name}]:before
+		font-weight: normal
+		content: quote(#{$content})
+
+@include icon('play','\e072')
+@include icon('pause','\e073')
+
+@include icon('speed','\e141')
+
+@include icon('hide','\e105')
+@include icon('show','\e106')
+
+@include icon('fullscreen','\e096')
+@include icon('exit-fullscreen','\e097')
+
+@include icon('load','\e134')
+@include icon('replay','\e030')

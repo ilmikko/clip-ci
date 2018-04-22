@@ -199,8 +199,10 @@ var player=(function(){
 		},
 		'control-pause':function(){
 			return $('>button')
-				.addClass('control-pause','icon')
-				.html('&#xe073;')
+				.addClass('control-pause')
+				.append(
+					$('>span').class('icon').set({name:'pause'})
+				)
 				.on('click',function(evt){
 					evt.stopPropagation();
 					togglePlaying();
@@ -226,8 +228,10 @@ var player=(function(){
 			.append(slider);
 
 			var button = $('>button')
-			.addClass('control-speed','icon')
-			.html('&#xe075;')
+			.addClass('control-speed')
+			.append(
+				$('>span').class('icon').set({name:'speed'})
+			)
 			.on('click',function(evt){
 				evt.stopPropagation();
 
@@ -251,8 +255,10 @@ var player=(function(){
 		},
 		'control-hide':function(){
 			return $('>button')
-				.addClass('control-hide','icon','slick')
-				.html('&#xe114;')
+				.addClass('control-hide')
+				.append(
+					$('>span').class('icon').set({name:'hide'})
+				)
 				.on('click',function(evt){
 					evt.stopPropagation();
 					toggleControls();
@@ -260,8 +266,10 @@ var player=(function(){
 		},
 		'control-fullscreen':function(){
 			return $('>button')
-				.addClass('control-fullscreen','icon','slick')
-				.html('&#xe140;')
+				.addClass('control-fullscreen')
+				.append(
+					$('>span').class('icon').set({name:'fullscreen'})
+				)
 				.on('click',function(evt){
 					evt.stopPropagation();
 					toggleFullscreen();
@@ -272,7 +280,7 @@ var player=(function(){
 
 			if (!o.delay) o.delay=150;
 			var button=$('>button')
-				.addClass('scene','slick')
+				.addClass('scene')
 				.css({opacity:0})
 				.prop({disabled:true});
 
@@ -288,7 +296,7 @@ var player=(function(){
 						evt.stopPropagation();
 						controls.changeScene(o.scene);
 					});
-			}else console.warn('Button without scene!');
+			} else console.warn('Button without scene!');
 
 			setTimeout(function(){
 				button.css({opacity:1}).prop({disabled:false});
@@ -494,7 +502,7 @@ var player=(function(){
 		var e=$player;
 		e.fullscreen();
 		// Update our fullscreen buttons
-		$player.$('.control-fullscreen').html(e.isFullscreen()?'&#xe096;':'&#xe097;');
+		$player.$('.control-fullscreen .icon').set({name:e.isFullscreen()?'fullscreen':'exit-fullscreen'});
 	}
 
 	function togglePlaying(){
@@ -508,7 +516,7 @@ var player=(function(){
 			currentvideo.element.pause();
 		}
 
-		$player.$('.control-pause').html(!paused?'&#xe072;':'&#xe073;');
+		$player.$('.control-pause .icon').set({name:!paused?'play':'pause'});
 	}
 
 	function toggleControls(force){
@@ -523,7 +531,7 @@ var player=(function(){
 			}
 		}
 
-		$player.$('.control-hide').html(e.hasClass('hidden')?'&#xe113;':'&#xe114;');
+		$player.$('.control-hide .icon').set({name:e.hasClass('hidden')?'show':'hide'});
 	}
 
 	function loadControls(arr){
