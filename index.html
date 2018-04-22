@@ -59,7 +59,7 @@
 
 			<!-- Everything that happens after loading -->
 			<!-- TODO -->
-			<div class="full post hidden">
+			<div class="full post fade blurred hidden">
 				<!-- Where the videos will be placed -->
 				<div class="full videos"></div>
 
@@ -92,6 +92,7 @@
 			// TODO: Make this more intuitive, and clean it up
 			player.load({
 				"start":"intro",
+				"bg":"./demo/thumb.png",
 				"options":[
 					{"type":"control-pause","location":"sw"},
 					{"type":"control-speed","location":"sw","min":0.5,"max":3,"default":1},

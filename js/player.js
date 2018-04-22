@@ -459,7 +459,7 @@ var player=(function(){
 	}
 
 	function focusPlayer(){
-		$player.$(".post").removeClass('hidden');
+		$player.$(".post").removeClass('blurred');
 	}
 
 	function hideThumb(){
@@ -475,9 +475,8 @@ var player=(function(){
 			.addClass('blurred')
 	}
 
-	function preloadShowFake(){
-		$player.$(".background > video.fake")
-			.removeClass('blurred')
+	function preloadSwapFake(){
+		$player.$(".post").removeClass('hidden')
 	}
 
 	function hideSceneButtons(){
@@ -751,8 +750,8 @@ var player=(function(){
 						// success, continue fast route
 						console.warn('Fast play successful');
 						g.pause();
-						// skip();
-						noskip();
+						skip();
+						// noskip();
 					},function(err){
 						// failure
 						console.warn(err+' but its okay. Continuing the longer route.');
@@ -815,7 +814,7 @@ var player=(function(){
 				// This is in the timeout to prevent flashing
 				if (playlist[0] in videos) videos[playlist[0]].show();
 
-				preloadShowFake();
+				preloadSwapFake();
 
 				setTimeout(function(){
 					// Start the playing process
