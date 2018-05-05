@@ -47,7 +47,7 @@ var player=(function(){
 				}
 
 				self.element
-					.prop({playbackRate:3})
+					.prop({playbackRate:5})
 					.on('timeupdate',function(){
 						var currentTime=this.e.currentTime;
 						if (currentTime>=bufferAmount||currentTime>=this.e.duration){
@@ -67,7 +67,7 @@ var player=(function(){
 				.on("ended",function(){
 					// The video has ended, check queue
 					iteration();
-				})
+				});
 		},
 		prepare:function(){
 			var self=this;
@@ -721,11 +721,12 @@ var player=(function(){
 		showLoadingProgressBar("Loading...");
 
 		LOADING.on('finish',function(){
-			// Ready up our videos
-			for (var g in videos) videos[g].ready();
-
 			// Wait for a while before we play
 			setTimeout(function(){
+				// Ready up our videos
+				// This happens in the timeout as the last video might still fire an ending event.
+				for (var g in videos) videos[g].ready();
+
 				// Finish the loading process, hiding some elements
 				hideLoading();
 
