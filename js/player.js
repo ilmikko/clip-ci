@@ -9,17 +9,17 @@ var player=(function(){
 	function Video(id,src){
 		this.id=id;
 		this.src=src;
-		this.element=createVideoElement();
+		this.element=$('>video').addClass('full').set({preload:"auto",playsinline:'',muted:''});
 	}
 	Video.prototype={
 		_toAlt:function(){
 			return this.element;
 		},
 		show:function(){
-			this.element.css({zIndex:1,opacity:1});
+			this.element.css({zIndex:1});
 		},
 		hide:function(){
-			this.element.css({zIndex:0,opacity:0})
+			this.element.css({zIndex:0})
 				.prop({currentTime:0});
 		},
 		stop:function(){
@@ -33,30 +33,32 @@ var player=(function(){
 
 			var self=this;
 
-			function success(){
+			LOADING.queue(function(){
+				LOADING.start('pre-'+self.id);
+
+				function success(){
+					self.element
+						.pause()
+						.prop({currentTime:0})
+						.off('timeupdate')
+						.off('ended');
+
+					LOADING.end('pre-'+self.id);
+				}
+
 				self.element
-					.pause()
-					.prop({currentTime:0})
-					.off('timeupdate')
-					.off('ended');
-
-				LOADING.end('pre-'+self.id);
-			}
-
-			LOADING.start('pre-'+this.id);
-
-			this.element
-				.prop({playbackRate:3})
-				.on('timeupdate',function(){
-					var currentTime=this.e.currentTime;
-					if (currentTime>=bufferAmount||currentTime>=this.e.duration){
-						success();
-					}else{
-						LOADING.update('pre-'+self.id,currentTime/bufferAmount);
-					}
-				})
-				.one('ended',function(){success();})
-				.play();
+					.prop({playbackRate:3})
+					.on('timeupdate',function(){
+						var currentTime=this.e.currentTime;
+						if (currentTime>=bufferAmount||currentTime>=this.e.duration){
+							success();
+						}else{
+							LOADING.update('pre-'+self.id,currentTime/bufferAmount);
+						}
+					})
+					.one('ended',function(){success();})
+					.play();
+			});
 		},
 		ready:function(){
 			// Ready for playing this video for real
@@ -573,10 +575,6 @@ var player=(function(){
 		blurPlayer();
 		hideLoading();
 		showLoadingProgressBar('Playback Error :<');
-	}
-
-	function createVideoElement(){
-		return $('>video').addClass('full').set({preload:"auto",playsinline:'',muted:''});
 	}
 
 	function prepareVideo(id,src){
