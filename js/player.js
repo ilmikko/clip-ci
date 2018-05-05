@@ -3,76 +3,7 @@ var player=(function(){
 
 	console.log("Hello, this is a debug version of the player");
 
-	function LoadingHandler(id){
-		this.id=id;
-		this.reset();
-	}
-	LoadingHandler.maxSimultaneousDownloads=3;
-	LoadingHandler.prototype={
-		start:function(id){
-			if (this.finished) console.warn('Race finished, but someone started!');
-			this.pending++;
-			console.log("STARTED: "+this.id+"["+id+"] ("+this.pending+")");
-			this.update(id,0);
-		},
-		queue:function(callback){
-			this.queuelist.push(callback);
-			if (this.pending==0) this.queuelist.shift()();
-		},
-		update:function(id,progress){
-			this.progress[id]=progress;
-			this.fire('update',{progress:this.getProgress()});
-			if (this.pending<LoadingHandler.maxSimultaneousDownloads&&this.queuelist.length) this.queuelist.shift()();
-		},
-		end:function(id){
-			if (this.finished) console.warn('Race finished, but someone ended! ('+id+')');
-			this.pending--;
-			this.update(id,1);
-			console.log("ENDED: "+this.id+"["+id+"] ("+this.pending+")");
-			if (this.pending==0) this.finish();
-		},
-		reset:function(){
-			this.progress={};
-			this.pending=0;
-			this.error=false;
-			this.finished=false;
-			this.queuelist=[];
-			this.callbacks={
-				finish:[],
-				update:[]
-			};
-		},
-		getProgress:function(){
-			// Calculate our total progress
-			var sum=0,count=this.queuelist.length;
-			for (var p in this.progress){
-				count++;
-				sum+=this.progress[p];
-			}
-
-			if (count==0) return 0;
-
-			return sum/count;
-		},
-		finish:function(){
-			this.finished=true;
-			console.log("FINISHED: "+this.id+" ("+this.pending+")");
-			// Fake 100% progress and fire final progress event
-			this.fire('update',{progress:1});
-
-			this.fire('finish');
-		},
-		fire:function(name,evt){
-			if (this.error) return;
-			var cbs=this.callbacks[name];
-			for (var g=0,glen=cbs.length;g<glen;g++) cbs[g](evt);
-		},
-		on:function(name,callback){
-			this.callbacks[name].push(callback);
-		}
-	};
-
-	var PRELOAD=new LoadingHandler('PRELOAD'),LOADING=new LoadingHandler('LOADING'),PLAYING=new LoadingHandler('PLAYING');
+	var PRELOAD=new LoadingHandler('PRELOAD'),PREPARING=new LoadingHandler('PREPARING'),LOADING=new LoadingHandler('LOADING');
 
 	var videos={},currentvideo,previousvideo;
 	function Video(id,src){
@@ -88,8 +19,7 @@ var player=(function(){
 			this.element.css({zIndex:1,opacity:1});
 		},
 		hide:function(){
-			this.element
-				.css({zIndex:0,opacity:0})
+			this.element.css({zIndex:0,opacity:0})
 				.prop({currentTime:0});
 		},
 		stop:function(){
@@ -104,54 +34,51 @@ var player=(function(){
 			var self=this;
 
 			function success(){
-				this
+				self.element
 					.pause()
 					.prop({currentTime:0})
 					.off('timeupdate')
 					.off('ended');
-				PLAYING.end('play-'+self.id);
+
+				LOADING.end('pre-'+self.id);
 			}
 
-			PLAYING.start('play-'+this.id);
+			LOADING.start('pre-'+this.id);
 
 			this.element
 				.prop({playbackRate:3})
 				.on('timeupdate',function(){
 					var currentTime=this.e.currentTime;
-					if (currentTime>bufferAmount||currentTime>this.e.duration){
-						success.call(this);
+					if (currentTime>=bufferAmount||currentTime>=this.e.duration){
+						success();
 					}else{
-						PLAYING.update('play-'+self.id,currentTime/bufferAmount);
+						LOADING.update('pre-'+self.id,currentTime/bufferAmount);
 					}
 				})
-				.one('ended',function(){
-					success.call(this);
-				})
+				.one('ended',function(){success();})
 				.play();
 		},
 		ready:function(){
 			// Ready for playing this video for real
-			var self=this;
 			this.element
+				.prop({playbackRate:1,currentTime:0})
 				.on("ended",function(){
 					// The video has ended, check queue
 					iteration();
 				})
-				.prop({playbackRate:1,currentTime:0})
 		},
-		load:function(){
+		prepare:function(){
 			var self=this;
-			LOADING.queue(function(){
-				LOADING.start('load-'+self.id);
+			PREPARING.queue(function(){
+				PREPARING.start('prepare-'+self.id);
 
 				self.element
-
 					.on("error",function(err){
 						error(err.message);
 					})
 					.one("canplaythrough",function(){
-						console.log("VIDEO LOADED: ->"+self.src);
-						LOADING.end('load-'+self.id);
+						console.log("VIDEO PREPARED: ->"+self.src);
+						PREPARING.end('prepare-'+self.id);
 					})
 
 					.set({src:self.src})
@@ -425,9 +352,6 @@ var player=(function(){
 	function hideLoading(){
 		$player.$('.loading > .full')
 			.addClass('hidden')
-			.one('transitionend',function(){
-				this.$('.loading-bar').css({width:0});
-			})
 	}
 
 	function showLoadingProgressBar(text){
@@ -486,14 +410,13 @@ var player=(function(){
 	}
 
 	function changeSpeed(speed,final){
-		if (!currentvideo) return; // Nothing's playing
-
-		currentvideo.element.prop({playbackRate:speed});
-
 		if (final){
 			console.log("Speed change: "+speed);
 			// Change for all the videos, not just the current one
 			for (var g in videos) videos[g].element.prop({playbackRate:speed});
+		}else{
+			if (!currentvideo) return; // Nothing's playing, scrubbing shouldn't work.
+			currentvideo.element.prop({playbackRate:speed});
 		}
 	}
 
@@ -637,14 +560,15 @@ var player=(function(){
 		ids={};
 
 		PRELOAD.reset();
+		PREPARING.reset();
 		LOADING.reset();
-		PLAYING.reset();
 	}
 
 	function error(msg){
 		console.error('Playback error: '+msg);
+
 		// Make sure we won't finish loading. :<
-		PRELOAD.error=LOADING.error=PLAYING.error=true;
+		PRELOAD.error=PREPARING.error=LOADING.error=true;
 
 		blurPlayer();
 		hideLoading();
@@ -655,13 +579,13 @@ var player=(function(){
 		return $('>video').addClass('full').set({preload:"auto",playsinline:'',muted:''});
 	}
 
-	function loadVideo(id,src){
+	function prepareVideo(id,src){
 		if (id in videos) return console.log('Video '+id+' already loaded.');
 
 		var video=new Video(id,src);
 		videos[id]=video;
 
-		video.load();
+		video.prepare();
 
 		addVideoToVideos(video);
 
@@ -682,7 +606,7 @@ var player=(function(){
 		PRELOAD.on('finish',function(){
 			console.log('Preload done');
 			showThumb();
-			loading(o);
+			preparing(o);
 		});
 
 		// Load the video ids first
@@ -710,17 +634,17 @@ var player=(function(){
 		}else error('No start scene!');
 	}
 
-	function loading(o){
+	function preparing(o){
 		showLoadingProgressBar("Preparing...");
 
-		LOADING.on('finish',function(){
+		PREPARING.on('finish',function(){
 			console.log('Loading done');
 
 			// Try if we can skip the user input step (desktop UX)
 			// Some browsers prevent autoplaying videos, this is for them.
 
 			function skip(){
-				playing(o);
+				loading(o);
 			}
 
 			function noskip(){
@@ -731,7 +655,7 @@ var player=(function(){
 				setTimeout(function(){
 					showLoadingLoadButton(function(){
 						setTimeout(function(){
-							playing(o);
+							loading(o);
 						},500);
 					});
 				},500);
@@ -770,21 +694,21 @@ var player=(function(){
 			}
 		});
 
-		LOADING.on('update',function(evt){
+		PREPARING.on('update',function(evt){
 			updateLoadingProgressBar(evt.progress);
 		});
 
 		// Load at least this long, for debug / visual purposes
-		LOADING.start('wait1s');
+		PREPARING.start('wait1s');
 		setTimeout(function(){
-			LOADING.end('wait1s');
-		},1000);
+			PREPARING.end('wait1s');
+		},250);
 
 		// Create required elements for controls
 		loadControls(o.options||[]);
 
 		// Load the rest of the ids
-		for (var g in ids) loadVideo(g,ids[g]);
+		for (var g in ids) prepareVideo(g,ids[g]);
 
 		// Load the rest of the loop logic
 		if ('scene' in o){
@@ -795,16 +719,13 @@ var player=(function(){
 		}
 	}
 
-	function playing(o){
+	function loading(o){
 		showLoadingProgressBar("Loading...");
 
-		for (var g in videos) videos[g].preplay();
-
-		PLAYING.on('finish',function(){
+		LOADING.on('finish',function(){
 			// Ready up our videos
-			for (var g in videos){
-				videos[g].ready();
-			}
+			for (var g in videos) videos[g].ready();
+
 			// Wait for a while before we play
 			setTimeout(function(){
 				// Finish the loading process, hiding some elements
@@ -824,9 +745,12 @@ var player=(function(){
 			},250);
 		});
 
-		PLAYING.on('update',function(evt){
+		LOADING.on('update',function(evt){
 			updateLoadingProgressBar(evt.progress);
 		});
+
+		// TODO: Preplay in batches
+		for (var g in videos) videos[g].preplay();
 	}
 
 	function load(o){
