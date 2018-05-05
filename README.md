@@ -2,6 +2,12 @@
 
 _A more accurate description will follow shortly..._
 
+## Feature list TODO:
+
+* Fade in / out support
+* Picture in picture
+* Varying speeds in scenes / loops
+
 ## JSON documentation
 
 The player supports several options that you can pass formatted as JSON.
