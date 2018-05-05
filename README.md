@@ -105,6 +105,30 @@ Which type of control this is (please see types below)
 Where this button is located on the controls div.
 Please see the locations below.
 
+#### Config `thumb` (`config.thumb`)
+
+The thumb overrides the thumbnail that is by default
+the first frame of the first scene. This thumbnail will be shown during the
+loading stage, and faded out after loading has been finished.
+
+Example usage:
+```
+"thumb":"./video/thumb.jpg"
+```
+
+#### Config `bg` (`config.bg`)
+
+The thumb overrides the black background that is left when the video is
+"letterboxed". You need to specify a path to an image file that is displayed
+instead.
+
+_TODO: add options to control blur and darken filters_
+
+Example usage:
+```
+"bg":"./video/bg.jpg"
+```
+
 
 ##### Types
 
@@ -137,7 +161,7 @@ Displays a button with a custom text.
 
 ##### Locations
 
-The location can be any point of the compass, as follows:
+The location can be any point of the compass, as any of the following:
 `n`,`ne`,`e`,`se`,`s`,`sw`,`w`,`nw`
 
 Or center, denoted by:
