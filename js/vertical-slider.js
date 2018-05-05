@@ -55,7 +55,8 @@ function verticalSlider(o){
   // Not enough people appreciate this
   self.on('contextmenu',function(evt){
     evt.preventDefault();
-    updateSlider(0.5);
+    updateSlider(value=0.5);
+    self.fire('input');
     return false;
   });
 

@@ -212,9 +212,9 @@ var player=(function(){
 			// Revised speed control...
 
 			var slider = verticalSlider({
-				min: 0.5,
-				mid: 1,
-				max: 3
+				min: o.min||0.5,
+				mid: o.mid||1,
+				max: o.max||3
 			})
 			.on('change',function(){
 				changeSpeed(this.value(),true);
