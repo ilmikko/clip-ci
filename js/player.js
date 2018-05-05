@@ -167,7 +167,7 @@ var player=(function(){
 		// Get our control locations
 		for (var g in controllocations) controllocations[g]=$player.$('.controls-'+g); // Get all our control locations
 
-		$player.$('.bottom-bar-wrapper')
+		$player.$('.controls')
 			.on('click',function(){
 				// Click displays the controls in case they're hidden
 				toggleControls(true);
