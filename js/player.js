@@ -190,7 +190,7 @@ var player=(function(){
 	var blueprints={
 		'control-replay':function(){
 			return $('>button')
-				.addClass('icon-text','scene')
+				.addClass('icon-text','large','scene')
 				.set({name:'replay'})
 				.text('Replay?')
 				.on('click',function(){
@@ -818,9 +818,9 @@ var player=(function(){
 
 				setTimeout(function(){
 					// Start the playing process
-					focusPlayer();
 					iteration();
-				},500);
+					focusPlayer();
+				},300);
 			},250);
 		});
 

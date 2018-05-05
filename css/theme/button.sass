@@ -29,3 +29,12 @@ button
 	border-radius: 4px
 
 	background-color: rgba(0,0,0,0.22)
+
+	&.large
+		padding: 25px 45px
+
+		// Do not transform a large button
+		&:hover
+			transform: scale(1,1)
+		&:active
+			transform: scale(1,1)
