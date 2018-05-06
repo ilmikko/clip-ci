@@ -63,7 +63,8 @@ Video.prototype={
 
       self.element
         .on("error",function(err){
-          error(err.message);
+          clearTimeout(timeoutObject);
+          if (player) player.error(err.message);
         })
         .one("canplaythrough",function(){
           clearTimeout(timeoutObject);
