@@ -82,9 +82,12 @@ var player=(function(){
 
 		// Remove click propagation from all the inputs in controls
 		// TODO: is this needed?
-		$player.$('.controls button,input').on('click',function(evt){
-			evt.stopPropagation();
-		});
+		$player.$('.controls button,input')
+			.on('click',function(evt){
+				evt.stopPropagation();
+			});
+
+		console.log("Player attached to "+$player.e);
 	}
 
 	var controllocations={'nw':1,'n':1,'ne':1,'w':1,'c':1,'e':1,'sw':1,'s':1,'se':1};
@@ -207,20 +210,18 @@ var player=(function(){
 		}
 	};
 
-	// SCENES
-	var scenes={},ids={},playlist=[],currentscene,startscene;
-	function Scene(id,type,o){
-		o=o||{};
+	var sources={};
 
+	// SCENES
+	var scenes={},playlist=[],currentscene,startscene;
+	function Scene(id,type,o){
 		this.id=id;
 		this.type=type;
 
-		this.videos=o.videos||[];
+		if (!o.play) o.play=[]; else if (!(o.play instanceof Array)) o.play=[o.play];
+		this.videos=o.play;
 
-		if (!o.ratio) o.ratio=null; else if (o.ratio.length!==o.videos.length) {
-			console.warn('Ratio lengths do not match in scene '+id);
-			o.ratio=null;
-		}
+		if (!o.ratio) o.ratio=null; else if (o.ratio.length!==o.videos.length) return error('Ratio lengths do not match in scene '+id);
 		this.ratio=o.ratio;
 
 		this.next=o.next;
@@ -245,6 +246,7 @@ var player=(function(){
 		}
 	};
 	Scene.create=function(id,type,o){
+		o=o||{};
 		return new Scene(id,type||"straight",o);
 	}
 
@@ -255,34 +257,6 @@ var player=(function(){
 			})
 			.one('load',callback)
 			.set({src:src});
-	}
-
-	function loadFakeVideo(src,callback){
-		console.log("Loading fake video...");
-
-		var video=new Video(src);
-		var self=video.element.addClass("fade","fake","blurred","hidden");
-
-		$player.$(".background > .fake-video").append(self);
-
-		video.prepare(function(){
-			self.removeClass('hidden');
-			callback();
-		});
-	}
-
-	function loadStartScene(scene,callback){
-		// loadSceneStart prioritizes in displaying the scene ASAP.
-		var scene=loadScene(scene);
-
-		startscene=scene;
-
-		changeScene(scene,true);
-
-		var firstvideoid=scene.pop();
-		if (firstvideoid){
-			loadFakeVideo(ids[firstvideoid],callback);
-		}
 	}
 
 	function addVideoToVideos(video){
@@ -307,6 +281,7 @@ var player=(function(){
 	}
 
 	function showLoadingProgressBar(text){
+		console.log(text);
 		hideLoading();
 
 		var wrapper = $('.loading-text');
@@ -420,6 +395,8 @@ var player=(function(){
 
 	function play(id){
 		if (id==null) return iteration();
+
+		// The ID should be separate for scenes / videos only
 		if (id in scenes){
 			console.log('Playing scene '+id);
 			changeScene(scenes[id]);
@@ -509,7 +486,7 @@ var player=(function(){
 		playlist=[];
 		videos={};
 		scenes={};
-		ids={};
+		sources={};
 
 		PRELOAD.reset();
 		PREPARING.reset();
@@ -550,96 +527,94 @@ var player=(function(){
 		return scenes[id]=scene;
 	}
 
+	// PRELOAD STAGE
 	function preload(o){
+		function config(o){
+			o=o||{};
+
+			// Create required elements for controls
+			if (o.controls) {
+				loadControls(o.controls);
+			}else{
+				loadControls([
+					{"type":"control-pause","location":"sw"},
+				  {"type":"control-speed","location":"sw","min":0.5,"max":3,"default":1},
+				  {"type":"control-hide","location":"se"},
+				  {"type":"control-fullscreen","location":"se"}
+				]);
+			}
+
+			// bg: colors at the background
+			if (o.bg) {
+				PRELOAD.start('bg');
+				loadBackground(o.bg,function(){
+					PRELOAD.end('bg');
+				});
+			}
+		}
+
 		PRELOAD.on('finish',function(){
 			console.log('Preload done');
 			showThumb();
 			preparing(o);
 		});
 
-		// Load the video ids first
-		if ('ids' in o){
-			for (var g in o.ids) ids[g]=o.ids[g];
-		}
+		// Attach sources
+		if ('source' in o) for (var g in o.source) sources[g]=o.source[g];
 
-		// bg: colors at the background
-		if (o.bg) {
-			PRELOAD.start('bg');
-			loadBackground(o.bg,function(){
-				PRELOAD.end('bg');
-			});
-		}
+		// Load config
+		if ('config' in o) config(o.config);
 
 		// Load the start scene first so we can stop displaying darkness
-		if ('start' in o){
-			if (!(o.start in o.scene)) return error('Start scene '+o.start+' not found');
+		if ('struct' in o) {
+			var start=o.struct.start,scenes=o.struct.scenes;
+			if (!start) return error('No start scene!');
+			if (!scenes) return error('No scenes provided!');
+			if (!(start in scenes)) return error('Start scene "'+o.start+'" not found in scenes!');
 
 			PRELOAD.start('startscene');
 			loadStartScene(
-				Scene.create(o.start,o.scene[o.start].type,o.scene[o.start]),
+				Scene.create(start,scenes[start].type,scenes[start]),
 				function(){PRELOAD.end('startscene');}
 			);
-		}else error('No start scene!');
+		}
 	}
 
+	function loadStartScene(scene,callback){
+		// loadSceneStart prioritizes in displaying the scene ASAP.
+		var scene=loadScene(scene);
+
+		startscene=scene;
+
+		changeScene(scene,true);
+
+		var firstvideoid=scene.pop();
+		if (!firstvideoid) console.warn('No video in scene "'+scene.id+'". Are you sure the scene.play property is populated?');
+		if (!(firstvideoid in sources)) return error('First video load failure; source "'+firstvideoid+'" not found');
+		else loadFakeVideo(sources[firstvideoid],callback);
+	}
+
+	function loadFakeVideo(src,callback){
+		console.log("Loading fake video...");
+
+		var video=new Video(src);
+		var self=video.element.addClass("fade","fake","blurred","hidden");
+
+		$player.$(".background > .fake-video").append(self);
+
+		video.prepare(function(){
+			self.removeClass('hidden');
+			callback();
+		});
+	}
+
+	// PREPARATION STEP
 	function preparing(o){
 		showLoadingProgressBar("Preparing...");
 
 		PREPARING.on('finish',function(){
 			console.log('Loading done');
-
-			// Try if we can skip the user input step (desktop UX)
-			// Some browsers prevent autoplaying videos, this is for them.
-
-			function skip(){
-				loading(o);
-			}
-
-			function noskip(){
-				hideLoading();
-
-				// Show the play button after a little timeout
-				// Wrap the user input nicely in timeouts
-				setTimeout(function(){
-					showLoadingLoadButton(function(){
-						setTimeout(function(){
-							loading(o);
-						},500);
-					});
-				},500);
-			}
-
-			for (var g in videos){
-				g=videos[g].element;
-				break;
-			}
-
-			if (g){
-				var p=g.e.play();
-				if (p){
-					// p is a promise
-					p.then(function(){
-						// success, continue fast route
-						console.warn('Fast play successful');
-						g.pause();
-						skip();
-						// noskip();
-					},function(err){
-						// failure
-						console.warn(err+' but its okay. Continuing the longer route.');
-						g.pause();
-						noskip();
-					});
-				}else{
-					// IE, p is not a promise
-					// Oh you, IE!
-					g.pause();
-					noskip();
-				}
-			}else{
-				// Unlikely, but let's not skip
-				noskip();
-			}
+			fastPlay(o);
 		});
 
 		PREPARING.on('update',function(evt){
@@ -652,18 +627,70 @@ var player=(function(){
 			PREPARING.end('wait1s');
 		},250);
 
-		// Create required elements for controls
-		loadControls(o.options||[]);
+		// Load the rest of the sources
+		for (var g in sources) prepareVideo(g,sources[g]);
 
-		// Load the rest of the ids
-		for (var g in ids) prepareVideo(g,ids[g]);
+		// Load the rest of the scenes in loop logic
+		var scenes=o.struct.scenes;
+		for (var id in scenes){
+			var options=scenes[id];
+			loadScene(Scene.create(id,options.type,options));
+		}
+	}
 
-		// Load the rest of the loop logic
-		if ('scene' in o){
-			for (var id in o.scene){
-				var options=o.scene[id];
-				loadScene(Scene.create(id,options.type,options));
+	function fastPlay(o){
+		// Try if we can skip the user input step (desktop UX)
+		// Some browsers prevent autoplaying videos, this is for them.
+
+		function skip(){
+			loading(o);
+		}
+
+		function noskip(){
+			hideLoading();
+
+			// Show the play button after a little timeout
+			// Wrap the user input nicely in timeouts
+			setTimeout(function(){
+				showLoadingLoadButton(function(){
+					setTimeout(function(){
+						loading(o);
+					},500);
+				});
+			},500);
+		}
+
+		// Get any video, test if we can play it
+		for (var g in videos){
+			g=videos[g].element;
+			break;
+		}
+
+		if (g){
+			var p=g.e.play();
+			if (p){
+				// p is a promise
+				p.then(function(){
+					// success, continue fast route
+					console.warn('Fast play successful');
+					g.pause();
+					skip();
+					// noskip();
+				},function(err){
+					// failure
+					console.warn(err+' but its okay. Continuing the longer route.');
+					g.pause();
+					noskip();
+				});
+			}else{
+				// IE, p is not a promise
+				// Oh you, IE!
+				g.pause();
+				noskip();
 			}
+		}else{
+			// Unlikely, but let's not skip
+			noskip();
 		}
 	}
 
@@ -703,7 +730,13 @@ var player=(function(){
 	}
 
 	function load(o){
-		o=o||{};
+		if (!o) return error("Load: arguments were empty.");
+
+		o.config=o.config||{};
+		o.source=o.source||{};
+		o.struct=o.struct||{};
+
+		attach(o.config.element||$('#player'));
 		reset();
 		preload(o);
 	}
@@ -714,6 +747,9 @@ var player=(function(){
 		},
 		attach:function(e){
 			attach(e);
+		},
+		error:function(e){
+			error(e);
 		},
 		changeScene:function(id){
 			if (currentscene&&id==currentscene.id) {
