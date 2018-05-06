@@ -1,1 +1,1 @@
-.loading-bar-wrapper{margin:7px 0;height:5px;min-width:100px;box-shadow:0px 0px 5px black;transition:opacity 500ms;background-color:rgba(0,0,0,0.3)}.loading-bar-wrapper .loading-bar{background-color:white;height:100%;width:0px;transition:width 150ms}
+.loading-bar-wrapper{margin:7px 0;height:5px;min-width:100px;box-shadow:2px 2px 3px black,0px 0px 10px rgba(0,0,0,0.5);transition:opacity 500ms;background-color:rgba(0,0,0,0.22)}.loading-bar-wrapper .loading-bar{background-color:white;height:100%;width:0px;transition:width 150ms}

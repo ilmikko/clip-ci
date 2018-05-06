@@ -1,1 +1,1 @@
-.player .loading-text{display:flex;flex-direction:column}.player .loading-text h2{text-shadow:0px 0px 5px black}
+.player .loading-text{display:flex;flex-direction:column}.player .loading-text>div{padding:15px;border-radius:7px}.player .loading-text>div h2{text-shadow:2px 2px 3px black,0px 0px 10px rgba(0,0,0,0.5)}
