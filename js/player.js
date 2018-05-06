@@ -549,6 +549,9 @@ var player=(function(){
 					PRELOAD.end('bg');
 				});
 			}
+
+			// cover
+			if (o.cover) $player.$('.bg-thumb').css({objectFit:'cover'});
 		}
 
 		PRELOAD.on('finish',function(){
@@ -726,6 +729,14 @@ var player=(function(){
 		LOADING.on('update',function(evt){
 			updateLoadingProgressBar(evt.progress);
 		});
+
+		function config(o){
+			// If covered, set object-fit of video to cover instead of contain.
+			if (o.cover) $player.$('video').css({objectFit:'cover'});
+		}
+
+		// Apply the rest of configs
+		config(o.config);
 
 		for (var g in videos) videos[g].preplay();
 	}
