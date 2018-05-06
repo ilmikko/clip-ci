@@ -304,7 +304,7 @@ var player=(function(){
 	}
 
 	function preloadHideFake(){
-		$player.$(".background > video.fake")
+		$player.$(".background video.fake")
 			.addClass('blurred')
 	}
 
@@ -602,7 +602,7 @@ var player=(function(){
 		var video=new Video(src);
 		var self=video.element.addClass("fade","fake","hidden");
 
-		$player.$(".background > .fake-video").append(self);
+		$player.$(".background .fake-video").append(self);
 
 		video.prepare(function(){
 			self.removeClass('hidden');
