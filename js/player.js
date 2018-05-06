@@ -213,9 +213,18 @@ var player=(function(){
 	var sources={},scenes={},playlist=[],currentscene,startscene;
 
 	function loadBackground(src,callback){
-		$player.$('.bg-thumb')
+		$player.$('.bg-background')
 			.on('error',function(evt){
 				error('Background image error');
+			})
+			.one('load',callback)
+			.set({src:src});
+	}
+
+	function loadThumb(src,callback){
+		$player.$('.bg-thumb')
+			.on('error',function(evt){
+				error('Thumb image error');
 			})
 			.one('load',callback)
 			.set({src:src});
@@ -230,7 +239,7 @@ var player=(function(){
 	}
 
 	function resetControls(){
-		$player.$(".controls .tbt .tbt").clear();
+		$player.$(".controls > .row > .col > *").remove();
 	}
 
 	function resetSceneControls(){
@@ -242,24 +251,29 @@ var player=(function(){
 			.addClass('hidden')
 	}
 
+	function showBackground(){
+		$player.$('.pre .background').removeClass('hidden');
+	}
+
 	function showLoadingProgressBar(text){
 		console.log(text);
 		hideLoading();
 
-		var wrapper = $('.loading-text');
-		wrapper.removeClass('hidden').$('h2').text(text);
+		$player.$('.loading-text')
+			.removeClass('hidden')
+			.$('h2')
+			.text(text);
 	}
 
 	function showLoadingLoadButton(click){
-		var wrapper = $player.$('.loading-button');
-
-		wrapper.removeClass('hidden');
-		wrapper.$('button')
-			.off('click')
-			.one('click',function(){
-				hideLoading();
-			})
-			.one('click',click);
+		$player.$('.loading-button')
+		  .removeClass('hidden')
+			.$('button')
+				.off('click')
+				.one('click',function(){
+					hideLoading();
+				})
+				.one('click',click);
 	}
 
 	function updateLoadingProgressBar(progress){
@@ -268,19 +282,25 @@ var player=(function(){
 	}
 
 	function blurPlayer(){
+		$player.$(".post,.bg-content").addClass('blurred');
+	}
+
+	function hidePlayer(){
 		$player.$(".post").addClass('hidden');
 	}
 
 	function focusPlayer(){
-		$player.$(".post").removeClass('blurred');
+		$player.$(".post,.bg-content").removeClass('blurred');
 	}
 
-	function hideThumb(){
-		$player.$(".background > .bg-thumb").addClass('hidden');
+	function hidePre(){
+		$player.$(".bg-background").addClass('hidden');
+		$player.$(".bg-thumb").addClass('hidden');
 	}
 
-	function showThumb(){
-		$player.$(".background > .bg-thumb").removeClass('hidden');
+	function showPre(){
+		$player.$(".bg-background").removeClass('hidden');
+		$player.$(".bg-thumb").removeClass('hidden');
 	}
 
 	function preloadHideFake(){
@@ -289,7 +309,8 @@ var player=(function(){
 	}
 
 	function preloadSwapFake(){
-		$player.$(".post").removeClass('hidden')
+		$player.$(".post")
+			.removeClass('hidden')
 	}
 
 	function hideSceneButtons(){
@@ -440,8 +461,10 @@ var player=(function(){
 		clearVideos();
 		resetControls();
 		blurPlayer();
+		hidePlayer();
 		preloadHideFake();
-		hideThumb();
+		hidePre();
+		showBackground();
 	}
 
 	function reset(){
@@ -518,12 +541,24 @@ var player=(function(){
 					PRELOAD.end('bg');
 				});
 			}
+
+			// thumb: thumbnail while loading
+			if (o.thumb) {
+				PRELOAD.start('bg');
+				loadThumb(o.thumb,function(){
+					PRELOAD.end('bg');
+				});
+			}
 		}
 
 		PRELOAD.on('finish',function(){
 			console.log('Preload done');
-			showThumb();
-			preparing(o);
+			showPre();
+
+			// Wait for a while so that the transition is smoother
+			setTimeout(function(){
+				preparing(o);
+			},222);
 		});
 
 		// Attach sources
@@ -565,7 +600,7 @@ var player=(function(){
 		console.log("Loading fake video...");
 
 		var video=new Video(src);
-		var self=video.element.addClass("fade","fake","blurred","hidden");
+		var self=video.element.addClass("fade","fake","hidden");
 
 		$player.$(".background > .fake-video").append(self);
 
@@ -684,7 +719,7 @@ var player=(function(){
 					// Start the playing process
 					iteration();
 					focusPlayer();
-				},300);
+				},20);
 			},250);
 		});
 
@@ -692,7 +727,6 @@ var player=(function(){
 			updateLoadingProgressBar(evt.progress);
 		});
 
-		// TODO: Preplay in batches
 		for (var g in videos) videos[g].preplay();
 	}
 
