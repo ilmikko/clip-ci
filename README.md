@@ -84,6 +84,23 @@ For example:
 ...
 ```
 
+#### Config `element` (`config.element`)
+
+The element property contains a single element or an identifier of an element,
+that will act as the player element. Usually this does not need to be specified,
+as the player element is considered to be the element with ID `player`.
+However, in some cases alternate elements are preferred, in which case you can
+change this property.
+
+Example usage:
+```
+"element":document.getElementById("player-id")
+```
+or
+```
+"element":"#player-id"
+```
+
 #### Config `controls` (`config.controls`)
 
 The controls section contains information which controls are displayed in the
@@ -95,7 +112,7 @@ be displayed at all times. This is a bug that needs to be fixed._
 
 The default value for this section is:
 ```
-[
+"controls":[
   {"type":"control-pause","location":"sw"},
   {"type":"control-speed","location":"sw","min":0.5,"max":3,"default":1},
   {"type":"control-hide","location":"se"},
@@ -135,6 +152,11 @@ Example usage:
 "bg":"./video/bg.jpg"
 ```
 
+#### Config `cover` (`config.cover`)
+
+The cover option makes the content cover the entire page instead of being
+contained (or "letterboxed") as a regular video element would.
+This also applies to the thumbnail media provided.
 
 ##### Types
 
