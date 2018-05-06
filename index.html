@@ -11,6 +11,7 @@
 		<!-- <script src="./js/app.min.js"></script> -->
 		<script src="./js/alt.js"></script>
 		<script src="./js/loading-handler.js"></script>
+		<script src="./js/video.js"></script>
 		<script src="./js/vertical-slider.js"></script>
 		<script src="./js/player.js"></script>
 	</head>
@@ -24,7 +25,7 @@
 					<img class="full blurred bg-thumb" />
 
 					<!-- First video that is loaded -->
-					<video class="full fade blurred hidden fake"></video>
+					<div class="full fake-video"></div>
 				</div>
 
 				<!-- Loading screen controls, interactive content -->
@@ -92,8 +93,6 @@
 			// TODO: Make this more intuitive, and clean it up
 			// TODO: thumb should be shown regardless, when the video is loading. In case there isn't a thumb, we use the first frame instead.
 			// TODO: bg should be just for the background, and should be a separate field altogether.
-
-
 			// TODO:s for the video:
 			// 1. Render layers together to reduce z-combine noise
 			// 2. Make loops more tight
@@ -102,153 +101,154 @@
 			// 5. Retime the movement transitions (I know it's a big edit)
 			// 6. "make it look good"
 
-			// player.load({
-			// 	"start":"intro",
-			// 	"bg":"./demo/thumb.png",
-			// 	"options":[
-			// 		{"type":"control-pause","location":"sw"},
-			// 		{"type":"control-speed","location":"sw","min":0.5,"max":3,"default":1},
-			// 		{"type":"control-hide","location":"se"},
-			// 		{"type":"control-fullscreen","location":"se"}
-			// 	],
-			// 	"ids":{
-			// 		"intro_video":"./demo/intro.mp4",
-			// 		"loop1_video":"./demo/loop1.mp4",
-			// 		"trans1_video":"./demo/trans1.mp4",
-			// 		"loop2_video":"./demo/loop2.mp4",
-			// 		"trans2_video":"./demo/trans2.mp4",
-			// 		"loop3_video":"./demo/loop3.mp4",
-			// 		"trans3_video":"./demo/trans3.mp4",
-			// 		"loop4_video":"./demo/loop4.mp4",
-			// 		"trans4b_video":"./demo/loop4b.mp4",
-			// 		"trans4_video":"./demo/trans4.mp4",
-			// 		"loop5_video":"./demo/loop5.mp4",
-			// 		"trans5_video":"./demo/trans5.mp4",
-			// 		"loop6_video":"./demo/loop6.mp4",
-			// 		"outro_video":"./demo/outro.mp4"
-			// 	},
-			// 	"scene":{
-			// 		"intro":{
-			// 			"videos":["intro_video"],
-			// 			"next":"loop1"
-			// 		},
-			// 		"loop1":{
-			// 			"type":"loop",
-			// 			"videos":["loop1_video"],
-			// 			"controls":[
-			// 				{
-			// 					"type":"button",
-			// 					"scene":"trans1",
-			// 					"text":"> FOCUS <",
-			// 					"delay":100
-			// 				}
-			// 			]
-			// 		},
-			// 		"trans1":{
-			// 			"videos":["trans1_video"],
-			// 			"next":"loop2"
-			// 		},
-			// 		"loop2":{
-			// 			"type":"loop",
-			// 			"videos":["loop2_video"],
-			// 			"controls":[
-			// 				{
-			// 					"type":"button",
-			// 					"scene":"trans2",
-			// 					"text":"> EXPAND <",
-			// 					"delay":200
-			// 				}
-			// 			]
-			// 		},
-			// 		"trans2":{
-			// 			"videos":["trans2_video"],
-			// 			"next":"loop3"
-			// 		},
-			// 		"loop3":{
-			// 			"type":"loop",
-			// 			"videos":["loop3_video"],
-			// 			"controls":[
-			// 				{
-			// 					"type":"button",
-			// 					"scene":"trans3",
-			// 					"text":"> SEEK <",
-			// 					"delay":150
-			// 				}
-			// 			]
-			// 		},
-			// 		"trans3":{
-			// 			"videos":["trans3_video"],
-			// 			"next":"loop4"
-			// 		},
-			// 		"loop4":{
-			// 			"type":"loop",
-			// 			"videos":["loop4_video"],
-			// 			"controls":[
-			// 				{
-			// 					"type":"button",
-			// 					"scene":"trans4b",
-			// 					"text":"> ROTATE <",
-			// 					"delay":200
-			// 				},
-			// 				{
-			// 					"type":"button",
-			// 					"scene":"trans4",
-			// 					"text":"> DEPLOY <",
-			// 					"delay":200
-			// 				}
-			// 			]
-			// 		},
-			// 		"trans4b":{
-			// 			"videos":["trans4b_video"],
-			// 			"next":"loop4"
-			// 		},
-			// 		"trans4":{
-			// 			"videos":["trans4_video"],
-			// 			"next":"loop5"
-			// 		},
-			// 		"loop5":{
-			// 			"type":"loop",
-			// 			"videos":["loop5_video"],
-			// 			"controls":[
-			// 				{
-			// 					"type":"button",
-			// 					"scene":"trans5",
-			// 					"text":"> LOCK <",
-			// 					"delay":350
-			// 				}
-			// 			]
-			// 		},
-			// 		"trans5":{
-			// 			"videos":["trans5_video"],
-			// 			"next":"loop6"
-			// 		},
-			// 		"loop6":{
-			// 			"type":"loop",
-			// 			"videos":["loop6_video"],
-			// 			"controls":[
-			// 				{
-			// 					"type":"button",
-			// 					"scene":"outro",
-			// 					"text":"> GO <",
-			// 					"delay":1050
-			// 				}
-			// 			]
-			// 		},
-			// 		"outro":{
-			// 			"videos":["outro_video"],
-			// 			"next":"end"
-			// 		},
-			// 		"end":{
-			// 			"type":"empty",
-			// 			"controls":[
-			// 				{
-			// 					"type":"control-replay",
-			// 					"location":"c"
-			// 				}
-			// 			]
-			// 		}
-			// 	}
-			// });
+			player.load({
+				"start":"intro",
+				"bg":"./demo/bg.png",
+				"thumb":"./demo/thumb.png",
+				"options":[
+					{"type":"control-pause","location":"sw"},
+					{"type":"control-speed","location":"sw","min":0.5,"max":3,"default":1},
+					{"type":"control-hide","location":"se"},
+					{"type":"control-fullscreen","location":"se"}
+				],
+				"ids":{
+					"intro_video":"./demo/intro.mp4",
+					"loop1_video":"./demo/loop1.mp4",
+					"trans1_video":"./demo/trans1.mp4",
+					"loop2_video":"./demo/loop2.mp4",
+					"trans2_video":"./demo/trans2.mp4",
+					"loop3_video":"./demo/loop3.mp4",
+					"trans3_video":"./demo/trans3.mp4",
+					"loop4_video":"./demo/loop4.mp4",
+					"trans4b_video":"./demo/loop4b.mp4",
+					"trans4_video":"./demo/trans4.mp4",
+					"loop5_video":"./demo/loop5.mp4",
+					"trans5_video":"./demo/trans5.mp4",
+					"loop6_video":"./demo/loop6.mp4",
+					"outro_video":"./demo/outro.mp4"
+				},
+				"scene":{
+					"intro":{
+						"videos":["intro_video"],
+						"next":"loop1"
+					},
+					"loop1":{
+						"type":"loop",
+						"videos":["loop1_video"],
+						"controls":[
+							{
+								"type":"button",
+								"scene":"trans1",
+								"text":"> FOCUS <",
+								"delay":100
+							}
+						]
+					},
+					"trans1":{
+						"videos":["trans1_video"],
+						"next":"loop2"
+					},
+					"loop2":{
+						"type":"loop",
+						"videos":["loop2_video"],
+						"controls":[
+							{
+								"type":"button",
+								"scene":"trans2",
+								"text":"> EXPAND <",
+								"delay":200
+							}
+						]
+					},
+					"trans2":{
+						"videos":["trans2_video"],
+						"next":"loop3"
+					},
+					"loop3":{
+						"type":"loop",
+						"videos":["loop3_video"],
+						"controls":[
+							{
+								"type":"button",
+								"scene":"trans3",
+								"text":"> SEEK <",
+								"delay":150
+							}
+						]
+					},
+					"trans3":{
+						"videos":["trans3_video"],
+						"next":"loop4"
+					},
+					"loop4":{
+						"type":"loop",
+						"videos":["loop4_video"],
+						"controls":[
+							{
+								"type":"button",
+								"scene":"trans4b",
+								"text":"> ROTATE <",
+								"delay":200
+							},
+							{
+								"type":"button",
+								"scene":"trans4",
+								"text":"> DEPLOY <",
+								"delay":200
+							}
+						]
+					},
+					"trans4b":{
+						"videos":["trans4b_video"],
+						"next":"loop4"
+					},
+					"trans4":{
+						"videos":["trans4_video"],
+						"next":"loop5"
+					},
+					"loop5":{
+						"type":"loop",
+						"videos":["loop5_video"],
+						"controls":[
+							{
+								"type":"button",
+								"scene":"trans5",
+								"text":"> LOCK <",
+								"delay":350
+							}
+						]
+					},
+					"trans5":{
+						"videos":["trans5_video"],
+						"next":"loop6"
+					},
+					"loop6":{
+						"type":"loop",
+						"videos":["loop6_video"],
+						"controls":[
+							{
+								"type":"button",
+								"scene":"outro",
+								"text":"> GO <",
+								"delay":1050
+							}
+						]
+					},
+					"outro":{
+						"videos":["outro_video"],
+						"next":"end"
+					},
+					"end":{
+						"type":"empty",
+						"controls":[
+							{
+								"type":"control-replay",
+								"location":"c"
+							}
+						]
+					}
+				}
+			});
 		</script>
 		<script type="text/javascript">
 			// HACK: This is probably the most sinful act I have ever done.

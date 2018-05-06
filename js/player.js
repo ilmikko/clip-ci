@@ -6,87 +6,59 @@ var player=(function(){
 	var PRELOAD=new LoadingHandler('PRELOAD'),PREPARING=new LoadingHandler('PREPARING'),LOADING=new LoadingHandler('LOADING');
 
 	var videos={},currentvideo,previousvideo;
-	function Video(id,src){
+	function PlayerVideo(id,src){
 		this.id=id;
-		this.src=src;
-		this.element=$('>video').addClass('full').set({preload:"auto",playsinline:'',muted:''});
+		this.video=new Video(src);
 	}
-	Video.prototype={
+	PlayerVideo.prototype={
 		_toAlt:function(){
-			return this.element;
-		},
+	    return this.video._toAlt();
+	  },
 		show:function(){
-			this.element.css({zIndex:1});
-		},
-		hide:function(){
-			this.element.css({zIndex:0})
-				.prop({currentTime:0});
-		},
-		stop:function(){
-			this.element
-				.pause()
-				.css({zIndex:0}); // Do this so we won't be taking prime time from playing videos
-		},
+	    this.video.element.css({zIndex:1});
+	  },
+	  hide:function(){
+	    this.video.element.css({zIndex:0})
+	      .prop({currentTime:0});
+	  },
+	  stop:function(){
+	    this.video.element
+	      .pause()
+	      .css({zIndex:0}); // Do this so we won't be taking prime time from playing videos
+	  },
 		preplay:function(){
 			// Preplay 5 or so seconds so we don't stutter when we need to play these videos for real
-			var bufferAmount=5; // seconds
-
 			var self=this;
-
 			LOADING.queue(function(){
 				LOADING.start('pre-'+self.id);
 
-				function success(){
-					self.element
-						.pause()
-						.prop({currentTime:0})
-						.off('timeupdate')
-						.off('ended');
-
+				self.video.preplay(function(){
 					LOADING.end('pre-'+self.id);
-				}
-
-				self.element
-					.prop({playbackRate:5})
-					.on('timeupdate',function(){
-						var currentTime=this.e.currentTime;
-						if (currentTime>=bufferAmount||currentTime>=this.e.duration){
-							success();
-						}else{
-							LOADING.update('pre-'+self.id,currentTime/bufferAmount);
-						}
-					})
-					.one('ended',function(){success();})
-					.play();
+				},function(progress){
+          LOADING.update('pre-'+self.id,progress);
+				});
 			});
 		},
 		ready:function(){
-			// Ready for playing this video for real
-			this.element
-				.prop({playbackRate:1,currentTime:0})
-				.on("ended",function(){
-					// The video has ended, check queue
-					iteration();
+	    // Ready for playing this video for real
+	    this.video.element
+	      .prop({playbackRate:1,currentTime:0})
+	      .on("ended",function(){
+	        // The video has ended, check queue
+	        iteration();
+	      });
+	  },
+	  prepare:function(){
+	    var self=this;
+	    PREPARING.queue(function(){
+	      PREPARING.start('prepare-'+self.id);
+
+				self.video.prepare(function(){
+					console.log("VIDEO PREPARED: ->"+self.id);
+					PREPARING.end('prepare-'+self.id);
 				});
-		},
-		prepare:function(){
-			var self=this;
-			PREPARING.queue(function(){
-				PREPARING.start('prepare-'+self.id);
-
-				self.element
-					.on("error",function(err){
-						error(err.message);
-					})
-					.one("canplaythrough",function(){
-						console.log("VIDEO PREPARED: ->"+self.src);
-						PREPARING.end('prepare-'+self.id);
-					})
-
-					.set({src:self.src})
-					.load();
-			});
-		}
+	    });
+	  }
 	};
 
 	function attach(playerElement){
@@ -288,37 +260,15 @@ var player=(function(){
 	function loadFakeVideo(src,callback){
 		console.log("Loading fake video...");
 
-		// TODO: Create a try-fix for older versions of Firefox, and unify this (why can't we have a new Video()?)
+		var video=new Video(src);
+		var self=video.element.addClass("fade","fake","blurred","hidden");
 
-		// Created a catch-all function because there are a ton of implementations
-		var fired=false;
-		function loaded(){
-			// This function is only allowed to fire once.
-			if (fired) {
-				console.warn("Video load was fired multiple times!");
-				return;
-			}
+		$player.$(".background > .fake-video").append(self);
 
-			fired=true;
-
-			this.off('canplaythrough').off('canplay').removeClass('hidden');
-			console.log("Fake video loaded!");
+		video.prepare(function(){
+			self.removeClass('hidden');
 			callback();
-		}
-
-		var video = $player.$(".background > video.fake")
-			.one('canplaythrough',loaded)
-			.one('canplay',loaded)
-			.one('load',loaded)
-			.on('error',function(){
-				error("Video playback error");
-			})
-			.set({src:src});
-
-		if (video.e.readyState > 3){
-			console.log("Immediate fire");
-			loaded();
-		}
+		});
 	}
 
 	function loadStartScene(scene,callback){
@@ -415,10 +365,10 @@ var player=(function(){
 		if (final){
 			console.log("Speed change: "+speed);
 			// Change for all the videos, not just the current one
-			for (var g in videos) videos[g].element.prop({playbackRate:speed});
+			for (var g in videos) videos[g].video.element.prop({playbackRate:speed});
 		}else{
 			if (!currentvideo) return; // Nothing's playing, scrubbing shouldn't work.
-			currentvideo.element.prop({playbackRate:speed});
+			currentvideo.video.element.prop({playbackRate:speed});
 		}
 	}
 
@@ -432,12 +382,12 @@ var player=(function(){
 	function togglePlaying(){
 		if (!currentvideo) return; // Nothing's playing
 
-		var paused=currentvideo.element.prop('paused');
+		var paused=currentvideo.video.element.prop('paused');
 
 		if (paused){
-			currentvideo.element.play();
+			currentvideo.video.element.play();
 		}else{
-			currentvideo.element.pause();
+			currentvideo.video.element.pause();
 		}
 
 		$player.$('.control-pause .icon').set({name:!paused?'play':'pause'});
@@ -506,7 +456,7 @@ var player=(function(){
 		currentvideo=video;
 		if (currentvideo){
 			currentvideo.show();
-			currentvideo.element.play();
+			currentvideo.video.element.play();
 		}
 	}
 
@@ -580,7 +530,7 @@ var player=(function(){
 	function prepareVideo(id,src){
 		if (id in videos) return console.log('Video '+id+' already loaded.');
 
-		var video=new Video(id,src);
+		var video=new PlayerVideo(id,src);
 		videos[id]=video;
 
 		video.prepare();
