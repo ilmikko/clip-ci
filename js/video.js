@@ -48,15 +48,31 @@ Video.prototype={
 
     // TODO: should there be an update callback?
 
-    this.element
-      .on("error",function(err){
-        error(err.message);
-      })
-      .one("canplaythrough",function(){
-        if (callback) callback();
-      })
+    var self=this;
+    var timeout=1000; // milliseconds
 
-      .set({src:this.src})
-      .load();
+    // Automatic retry as some browsers hiccup on the loading sometimes (I know)
+    function retry(){
+      // Wait a while until retrying
+      var timeoutObject=setTimeout(function(){
+        var readyState=self.element.e.readyState;
+
+        console.warn(self.src+" is taking a while to load. (readyState="+readyState+")");
+        if (readyState==0) retry();
+      },timeout);
+
+      self.element
+        .on("error",function(err){
+          error(err.message);
+        })
+        .one("canplaythrough",function(){
+          clearTimeout(timeoutObject);
+          if (callback) callback();
+        })
+
+        .set({src:self.src+"?random="+Math.random()})
+        .load();
+    }
+    retry();
   }
 };
