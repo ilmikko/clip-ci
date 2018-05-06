@@ -25,12 +25,11 @@
     display: flex
     flex-direction: row
 
+    // Bottom and top row
+    flex: 1 1 20px
+
     &.mid
       flex: 10 1 auto
-
-    &:last-child
-      // Bottom row
-      flex: 1 1 20px
 
   &.fade
     transition: opacity 500ms, transform 500ms
@@ -61,32 +60,50 @@
     .col
       max-height: 75px
 
-  .controls-c
-    align-items: center
-
-  .controls-e
-    align-items: flex-end
-
-  .controls-nw, .controls-ne
-    flex-direction: row
-    align-items: flex-start
-
-  .controls-w, .controls-c, .controls-e
+  .controls-w
     flex-direction: column
     justify-content: center
+    align-items: flex-start
 
-  .controls-sw, .controls-s, .controls-se
-    align-items: flex-end
-    flex-direction: row
-
-  .controls-nw, .controls-sw
-    justify-content: flex-start
-
-  .controls-n, .controls-c, .controls-s
+  .controls-e
+    flex-direction: column
     justify-content: center
+    align-items: flex-end
 
-  .controls-ne, .controls-se
+  .controls-n
+    flex-direction: row
+    justify-content: center
+    align-items: flex-start
+
+  .controls-s
+    flex-direction: row
+    justify-content: center
+    align-items: flex-end
+
+  .controls-nw
+    flex-direction: row
+    justify-content: flex-start
+    align-items: flex-start
+
+  .controls-ne
+    flex-direction: row
     justify-content: flex-end
+    align-items: flex-start
+
+  .controls-sw
+    flex-direction: row
+    justify-content: flex-start
+    align-items: flex-end
+
+  .controls-se
+    flex-direction: row
+    justify-content: flex-end
+    align-items: flex-end
+
+  .controls-c
+    flex-direction: row
+    justify-content: center
+    align-items: center
 
 // In lack of space, pop the middle element on top of the rest.
 @media screen and (max-width: 720px)
