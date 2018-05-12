@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+	<head>
+		<meta charset="utf-8">
+		<title>CLIP Demo</title>
+
+		<!-- App CSS -->
+		<link rel="stylesheet" href="./css/app.min.css">
+
+		<!-- App scripts -->
+		<!-- <script src="./js/app.min.js"></script> -->
+		<script src="./js/alt.js"></script>
+		<script src="./js/loading-handler.js"></script>
+		<script src="./js/video.js"></script>
+		<script src="./js/scene.js"></script>
+		<script src="./js/vertical-slider.js"></script>
+		<script src="./js/player.js"></script>
+	</head>
+	<body>
+		<div id="player" class="player">
+			<!-- Everything that happens before the content has loaded -->
+			<div class="full pre">
+				<!-- Background image / fake video preload -->
+				<div class="full background fade hidden">
+					<div class="bg-content fade blurred">
+						<!-- Image that is displayed before any video has loaded -->
+						<img class="full bg-background" />
+
+						<!-- First video that is loaded -->
+						<div class="full fake-video"></div>
+					</div>
+
+					<!-- Thumbnail image -->
+					<img class="full bg-thumb fade" />
+				</div>
+
+				<!-- Loading screen controls, interactive content -->
+				<div class="full loading">
+					<!-- Loading text and -bar -->
+					<div class="full fade hidden loading-text">
+						<!-- A div to keep the content as large as it needs to be -->
+						<div>
+							<!-- A div for padding -->
+							<div>
+								<!-- Text placement -->
+								<h2></h2>
+
+								<!-- Loading bar wrapper -->
+								<div class="loading-bar-wrapper">
+									<div class="loading-bar"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Play button -->
+					<div class="full fade hidden loading-button">
+						<button class="icon-text large" name="load">Press to load</button>
+					</div>
+
+					<!-- Noscript message -->
+					<noscript>
+						<div class="full fade loading-no-javascript">
+								<h3>Please <a href="https://www.enable-javascript.com/" target="_blank">enable JavaScript</a> to support the HTML5 player.</h3>
+						</div>
+					</noscript>
+				</div>
+			</div>
+
+			<!-- Everything that happens after loading -->
+			<!-- TODO -->
+			<div class="full post fade blurred hidden">
+				<!-- Where the videos will be placed -->
+				<div class="full videos"></div>
+
+				<!-- User controls -->
+				<div class="full">
+					<div class="full fade controls noselect">
+						<div class="row">
+							<div class="col controls-nw"></div>
+							<div class="col mid controls-n"></div>
+							<div class="col controls-ne"></div>
+						</div>
+						<div class="row mid">
+							<div class="col controls-w"></div>
+							<div class="col mid controls-c"></div>
+							<div class="col controls-e"></div>
+						</div>
+						<div class="row">
+							<div class="col controls-sw"></div>
+							<div class="col mid controls-s"></div>
+							<div class="col controls-se"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script>
+			// player.load({});
+		</script>
+	</body>
+</html>
