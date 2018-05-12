@@ -254,17 +254,5 @@
 				}
 			});
 		</script>
-		<script type="text/javascript">
-			// HACK: This is probably the most sinful act I have ever done.
-			// In order to improve playback speeds, we run some intervals in the background
-			// doing pretty much nothing, and as the CPU usage of the browser window rises,
-			// the video playback becomes smoother. I'm so sorry.
-      for (var i=0;i<220;i++){
-        setInterval(function(){
-          var t = 0;
-          for (var g=0;g<500;g++) t++;
-        },1);
-      }
-    </script>
 	</body>
 </html>
