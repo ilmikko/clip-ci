@@ -5,6 +5,8 @@ var player=(function(){
 
 	var PRELOAD=new LoadingHandler('PRELOAD'),PREPARING=new LoadingHandler('PREPARING'),LOADING=new LoadingHandler('LOADING');
 
+	var config={};
+
 	var videos={},currentvideo,previousvideo;
 	function PlayerVideo(id,src){
 		this.id=id;
@@ -519,7 +521,7 @@ var player=(function(){
 
 	// PRELOAD STAGE
 	function preload(o){
-		function config(o){
+		function loadconfig(o){
 			o=o||{};
 
 			// Create required elements for controls
@@ -552,6 +554,8 @@ var player=(function(){
 
 			// cover
 			if (o.cover) $player.$('.bg-thumb').css({objectFit:'cover'});
+
+			config=o;
 		}
 
 		PRELOAD.on('finish',function(){
@@ -568,7 +572,7 @@ var player=(function(){
 		if ('source' in o) for (var g in o.source) sources[g]=o.source[g];
 
 		// Load config
-		if ('config' in o) config(o.config);
+		if ('config' in o) loadconfig(o.config);
 
 		// Load the start scene first so we can stop displaying darkness
 		if ('struct' in o) {
@@ -604,6 +608,9 @@ var player=(function(){
 
 		var video=new Video(src);
 		var self=video.element.addClass("fade","fake","hidden");
+
+		// Contain/cover depending on config
+		if (config.cover) video.element.css({objectFit:'cover'});
 
 		$player.$(".background .fake-video").append(self);
 
@@ -730,13 +737,13 @@ var player=(function(){
 			updateLoadingProgressBar(evt.progress);
 		});
 
-		function config(o){
+		function loadconfig(o){
 			// If covered, set object-fit of video to cover instead of contain.
 			if (o.cover) $player.$('video').css({objectFit:'cover'});
 		}
 
 		// Apply the rest of configs
-		config(o.config);
+		loadconfig(o.config);
 
 		for (var g in videos) videos[g].preplay();
 	}
