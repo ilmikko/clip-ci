@@ -555,6 +555,9 @@ var player=(function(){
 			// cover
 			if (o.cover) $player.$('.bg-thumb').css({objectFit:'cover'});
 
+			// blur
+			if (o.blur) $player.$('.background').css({filter:'blur(22px)'});
+
 			config=o;
 		}
 
