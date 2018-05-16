@@ -158,6 +158,12 @@ The cover option makes the content cover the entire page instead of being
 contained (or "letterboxed") as a regular video element would.
 This also applies to the thumbnail media provided.
 
+#### Config `blur` (`config.blur`)
+
+The blur option determines whether the loading background should be blurred.
+This also means that the thumbnail will be blurred.
+Currently there is no way of animating blur, because it is a very expensive operation.
+
 ##### Types
 
 * `control-replay`
